@@ -15,7 +15,7 @@ class StudentController extends Controller
     public function index()
     {
         $students = Student::all();
-        return view('Student.list', compact('students', 'students'));
+        return view('list', ['students' => $students]);
     }
 
     /**
@@ -25,7 +25,7 @@ class StudentController extends Controller
      */
     public function create()
     {
-        return view('student.create');
+        return view('create');
     }
 
     /**
@@ -34,21 +34,22 @@ class StudentController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $req)
     {
         //
-        $request->validate([
+        $req->validate([
             'txtFirstName' => 'required',
             'txtLastName' => 'required',
             'txtAddress' => 'required'
         ]);
         $student = new Student([
-            'first_name' => $request->get('txtFirstName'),
-            'last_name' => $request->get('txtLastName'),
-            'address' => $request->get('txtAddress')
+            'first_name' => $req->get('txtFirstName'),
+            'last_name' => $req->get('txtLastName'),
+            'address' => $req->get('txtAddress')
         ]);
         $student->save();
-        return redirect('/student')->with('sucess', 'student has been added');
+        $req->session()->flash('status', 'students stored sucessfully');
+        return redirect('list');
     }
 
     /**
@@ -60,7 +61,7 @@ class StudentController extends Controller
     public function show(Student $student)
     {
         //
-        return view('student.view', compact('student'));
+        return view('view', compact('student'));
     }
 
     /**
@@ -69,10 +70,11 @@ class StudentController extends Controller
      * @param  \App\Models\Student  $student
      * @return \Illuminate\Http\Response
      */
-    public function edit(Student $student)
+    public function edit(Student $student, $id)
     {
         //
-        return view('student.edit', compact('student'));
+        $student = Student::find($id);
+        return view('edit', ['student' => $student]);
     }
 
     /**
@@ -82,21 +84,22 @@ class StudentController extends Controller
      * @param  \App\Models\Student  $student
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $req, $id)
     {
         //
-        $request->validate([
+        $req->validate([
             'txtFirstName' => 'required',
             'txtLastName' => 'required',
             'txtAddress' => 'required'
         ]);
         $student = Student::find($id);
-        $student->first_name = $request->get('txtFirstName');
-        $student->last_name = $request->get('txtlastName');
-        $student->address = $request->get('txtAddress');
+        $student->first_name = $req->get('txtFirstName');
+        $student->last_name = $req->get('txtlastName');
+        $student->address = $req->get('txtAddress');
 
         $student->update();
-        return redirect('/student')->with('success', 'students updated successfully');
+        $req->session()->flash('status', 'students updated');
+        return redirect('list');
     }
 
     /**
@@ -109,6 +112,6 @@ class StudentController extends Controller
     {
         //
         $student->delete();
-        return redirect('/student')->with('success', 'students deleted sucessfully');
+        return redirect('list')->with('success', 'students deleted sucessfully');
     }
 }
